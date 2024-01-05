@@ -2,3 +2,4 @@
 	path = integrated_methane_inversion
 	url = git@github.com:eastjames/integrated_methane_inversion.git
 	branch = feature/global_inversion
+	update = merge
