@@ -4,4 +4,4 @@ pushd gc_global_sensitivities
 git checkout jde-edits
 popd
 
-git clone git@github.com:nicholasbalasus/for_james.git
+#git clone git@github.com:nicholasbalasus/for_james.git
