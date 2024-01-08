@@ -3,3 +3,5 @@ git clone git@github.com:nicholasbalasus/gc_global_sensitivities.git
 pushd gc_global_sensitivities
 git checkout jde-edits
 popd
+
+git clone git@github.com:nicholasbalasus/for_james.git

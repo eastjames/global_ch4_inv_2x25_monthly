@@ -3,7 +3,3 @@
 	url = git@github.com:eastjames/integrated_methane_inversion.git
 	branch = feature/global_inversion
 	update = merge
-
-[submodule "for_james"]
-    path = prep/for_james
-    url = git@github.com:nicholasbalasus/for_james.git

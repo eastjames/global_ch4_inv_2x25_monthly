@@ -5,11 +5,12 @@ git config -f .gitmodules submodule.integrated_methane_inversion.branch feature/
 git submodule update --remote
 cd integrated_methane_inversion
 git checkout feature/global_inversion
+cd ..
 
 # get changes with 
 git submodule update --remote --merge
 
 # push parent repo changes with
-get push --recurse-submodules=check
+#get push --recurse-submodules=check
 #or do
 git config push.recurseSubmodules check
