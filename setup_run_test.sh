@@ -51,7 +51,7 @@ do_month () {
     sed -i -e "s|my_partition|${SchedulerPartition}|g" run_imi.sh
     
     # submit the test case
-    sbatch ./run_imi_testing.sh
+    sbatch ./run_imi.sh
     cd ..
     
 }
