@@ -18,6 +18,10 @@ Repository for global inversion of CH4 fluxes using TROPOMI+GOSAT blended retrie
 * `setup_submodule.sh`
     * commands to set up submodules, safe to ignore
 
+### view outputs
+`prep/testing/TestingCheck.ipynb`
+* should run right out of the box for test case
+
 ### how to run
 1. edit `setup_run_test.sh`
     * RunNamePrefix
