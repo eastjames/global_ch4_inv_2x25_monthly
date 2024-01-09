@@ -22,7 +22,7 @@ do_month () {
 
     # set start and end dates
     mydate1=$(date -d "${year}${month}01" '+%Y%m%d')
-    mydate2=$(date -d "${year}${month}01 + 1month" '+%Y%m%d')
+    mydate2=$(date -d "${year}${month}01 + 3month" '+%Y%m%d')
 
     # set unique run path
     RunName=${RunNamePrefix}_${mydate1}
