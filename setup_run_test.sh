@@ -3,8 +3,8 @@
 
 # specify imi name, output path, and partition
 RunNamePrefix="imi"
-OutputPath="/path/to/imi/output"
-SchedulerPartition="seas_compute"
+OutputPath="/n/holyscratch01/jacob_lab/jeast/proj/globalinv/testing_monthly/output"
+SchedulerPartition="sapphire"
 
 # make output dir
 mkdir -p $OutputPath
