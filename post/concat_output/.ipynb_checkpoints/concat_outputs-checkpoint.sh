@@ -1,9 +1,17 @@
 #!/bin/bash
 
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH -o "prod_run.log"
+#SBATCH -c 1
+#SBATCH -t 0-72:00
+#SBATCH -p sapphire
+#SBATCH -J main
+
 
 # specify imi name, output path, and partition
 RunNamePrefix="imi"
-OutputPath="/n/holyscratch01/jacob_lab/jeast/proj/globalinv/testing_monthly/output"
+OutputPath="/n/holyscratch01/jacob_lab/jeast/proj/globalinv/prod/output"
 SchedulerPartition="sapphire"
 
 # make output dir
@@ -31,7 +39,7 @@ do_month () {
     # and copy in config and run script
     mkdir -p imi_${mydate1}
     cd imi_${mydate1}
-    cp ../../integrated_methane_inversion/config_template_test.yml config.yml
+    cp ../../integrated_methane_inversion/config_template.yml config.yml
     cp ../../integrated_methane_inversion/run_imi_template.sh run_imi.sh
     
     # link files to mirror imi dir
@@ -49,6 +57,7 @@ do_month () {
 
     # edit run dir
     sed -i -e "s|my_partition|${SchedulerPartition}|g" run_imi.sh
+    sed -i -e "s|prod_run_imi|prod_run_imi_${mydate1}|g" run_imi.sh
     
     # submit the test case
     sbatch ./run_imi.sh
@@ -57,15 +66,28 @@ do_month () {
 }
 
 
+concat_output () {
+
+    export mydate=$(date -d "${year}${month}01" '+%Y%m%d')
+    export OutputDir
+    cd imi_${mydate}
+    cp ../../run_concat.sh .
+    sed -i -e "s|my_output_path|${OutputPath}|g" run_concat.sh
+    sed -i -e "s|my_date|${mydate}|g" run_concat.sh
+    sed -i -e "s|my_partition|${SchedulerPartition}|g" run_concat.sh
+    sbatch ./run_concat.sh
+
+}
+
+
 mkdir -p cases
 cd cases
 
 
-#for month in {01..12}; do
-#for year in 2018 2019; do
-for month in {06..07}; do
 for year in 2018; do
-do_month
+for month in 06; do
+concat_output
 echo $(date -d "${year}${month}01" '+%Y-%m-%d')
 done
 done
+
