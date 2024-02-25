@@ -757,11 +757,11 @@ if __name__ == '__main__':
 
     # call script like this (example):
     #
-    # python -u ProcessGlobalJacobianRuns.py 201806 imi_20180601_000000 /n/holylfs06/SCRATCH/jacob_lab/jeast/proj/globalinv/
+    # python -u ProcessGlobalJacobianRuns.py 201806 imi_20180601_000000 /n/holylfs06/SCRATCH/jacob_lab/jeast/proj/globalinv/ 56
     #
     #     or, e.g.:
     #
-    # python -u ProcessGlobalJacobianRuns.py 201807 imi_20180601_001375 /n/holylfs06/SCRATCH/jacob_lab/jeast/proj/globalinv/
+    # python -u ProcessGlobalJacobianRuns.py 201807 imi_20180601_001375 /n/holylfs06/SCRATCH/jacob_lab/jeast/proj/globalinv/  56
     #
 
 
@@ -776,6 +776,10 @@ if __name__ == '__main__':
 
     # input files dir
     input_dir = sys.argv[3]
+
+    # number of cores to use for multiprocessing
+    n_processes = int(sys.argv[4])
+    print(f'{n_processes = }')
 
     # whether it is base run or not
     if sv_case == '000000':
@@ -806,7 +810,7 @@ if __name__ == '__main__':
 
     print('processing')
     # following https://pythonspeed.com/articles/python-multiprocessing/
-    with get_context('spawn').Pool() as p:
+    with get_context('spawn').Pool(n_processes) as p:
         result = p.starmap(make_regridding_weight, args_in)
 
     print('merging')
@@ -814,14 +818,16 @@ if __name__ == '__main__':
     ds_merged = xr.concat(result_clean, 'time')
     print('writing to disk')
 
-    output_path = lambda x,y: (
+    output_path = lambda x,m,sv: (
         '/n/holylfs05/LABS/jacob_lab/Users/jeast/proj/globalinv/'
-        f'prod/output/{x}/inversion/data_converted_nc/out_{y}.nc'
+        f'prod/output/{x}/inversion/data_converted_nc/out_{x}_{m}_{sv}.nc'
     )    
-    os.makedirs('/'.join(output_path(imi_dir, imi_case).split('/')[:-1]), exist_ok=True)
+    monthout = month.strftime('%Y%m%d')
+    path_out = output_path(imi_dir, monthout, sv_case)
+    os.makedirs('/'.join(path_out.split('/')[:-1]), exist_ok=True)
 
     ds_merged.to_netcdf(
-        output_path(imi_dir, imi_case),
+        path_out,
         encoding = {v: {'zlib':True, 'complevel':1} for v in ds_merged.data_vars},
         unlimited_dims='time'
     ) 

@@ -10,22 +10,34 @@
 do_case () {
 
 
+    n_cpus=56
+
     mydate=$(date -d "${year}${month}01" '+%Y%m%d')
 
     for mm in 0 1 2; do
 
         yyyymm=$(date -d "${mydate} + ${mm}month" '+%Y%m')
         imi_case=imi_${mydate}
-        
+
         sbatch \
-        --array=0-3753%3754 \
-        -c 64 \
+        --array=0 \
+        -c $n_cpus \
         -t 0-00:30 \
         --mem 256gb \
         -p seas_compute,sapphire,serial_requeue \
-        -J ${imi_case}-${yyyymm} \
+        -J process_${imi_case}-${yyyymm} \
         -o logs/slurm_${imi_case}_${yyyymm}-%j.out \
-        -W ./submit_process_jacobian_runs.sh ${yyyymm} ${imi_case} ${input_dir}
+        -W ./submit_process_jacobian_runs.sh ${yyyymm} ${imi_case} ${input_dir} ${n_cpus}
+        
+        sbatch \
+        --array=1-3753%3754 \
+        -c $n_cpus \
+        -t 0-00:15 \
+        --mem 16gb \
+        -p seas_compute,sapphire,serial_requeue \
+        -J process_${imi_case}-${yyyymm} \
+        -o logs/slurm_${imi_case}_${yyyymm}-%j.out \
+        -W ./submit_process_jacobian_runs.sh ${yyyymm} ${imi_case} ${input_dir} ${n_cpus}
 
     done
     
@@ -33,7 +45,7 @@ do_case () {
 
 input_dir='/n/holyscratch01/jacob_lab/jeast/proj/globalinv'
 
-for month in {06..12}; do
+for month in 12; do
 for year in 2018; do
 echo $(date -d "${year}${month}01" '+%Y-%m-%d')
 do_case
