@@ -781,6 +781,9 @@ if __name__ == '__main__':
     n_processes = int(sys.argv[4])
     print(f'{n_processes = }')
 
+    # whether to check for existing file
+    check_exists = sys.argv[5].lower() == 'true'
+
     # whether it is base run or not
     if sv_case == '000000':
         base_run_input = True
@@ -808,28 +811,47 @@ if __name__ == '__main__':
     # arguments for function calls
     args_in = [(blnd_f, base_run_input, n_sv, gc_path) for blnd_f in blnd_files] 
 
-    print('processing')
-    # following https://pythonspeed.com/articles/python-multiprocessing/
-    with get_context('spawn').Pool(n_processes) as p:
-        result = p.starmap(make_regridding_weight, args_in)
-
-    print('merging')
-    result_clean = list(filter(None, result))
-    ds_merged = xr.concat(result_clean, 'time')
-    print('writing to disk')
-
+    # check if file exists
     output_path = lambda x,m,sv: (
         '/n/holylfs05/LABS/jacob_lab/Users/jeast/proj/globalinv/'
         f'prod/output/{x}/inversion/data_converted_nc/out_{x}_{m}_{sv}.nc'
     )    
     monthout = month.strftime('%Y%m%d')
     path_out = output_path(imi_dir, monthout, sv_case)
-    os.makedirs('/'.join(path_out.split('/')[:-1]), exist_ok=True)
 
-    ds_merged.to_netcdf(
-        path_out,
-        encoding = {v: {'zlib':True, 'complevel':1} for v in ds_merged.data_vars},
-        unlimited_dims='time'
-    ) 
-    print('done')
+    skip_it = ( check_exists and os.path.isfile(path_out) )
+
+    if skip_it:
+        print('file already exists, skipping & exiting:')
+        print(path_out)
+        sys.exit()
+
+    else:
+        print('processing')
+
+        os.makedirs('/'.join(path_out.split('/')[:-1]), exist_ok=True)
+
+        # following https://pythonspeed.com/articles/python-multiprocessing/
+        with get_context('spawn').Pool(n_processes) as p:
+            result = p.starmap(make_regridding_weight, args_in)
+
+        print('merging')
+        result_clean = list(filter(None, result))
+        ds_merged = xr.concat(result_clean, 'time')
+        print('writing to disk')
+
+        output_path = lambda x,m,sv: (
+            '/n/holylfs05/LABS/jacob_lab/Users/jeast/proj/globalinv/'
+            f'prod/output/{x}/inversion/data_converted_nc/out_{x}_{m}_{sv}.nc'
+        )    
+        monthout = month.strftime('%Y%m%d')
+        path_out = output_path(imi_dir, monthout, sv_case)
+        os.makedirs('/'.join(path_out.split('/')[:-1]), exist_ok=True)
+
+        ds_merged.to_netcdf(
+            path_out,
+            encoding = {v: {'zlib':True, 'complevel':1} for v in ds_merged.data_vars},
+            unlimited_dims='time'
+        ) 
+        print('done')
 
